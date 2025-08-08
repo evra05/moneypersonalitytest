@@ -653,23 +653,9 @@ function showResults() {
                                 <div class="other-personality-header">
                                     <div class="other-personality-icon-name">
                                         <div class="other-personality-icon">
-                                            <div class="personality-icon-container" style="
-                                                width: 120px; 
-                                                height: 120px; 
-                                                border-radius: 50%; 
-                                                background: ${personalityData.color}; 
-                                                display: flex; 
-                                                align-items: center; 
-                                                justify-content: center; 
-                                                margin: 0 auto;
-                                                aspect-ratio: 1;
-                                                min-width: 120px;
-                                                min-height: 120px;
-                                                max-width: 120px;
-                                                max-height: 120px;">
+                                            <div class="personality-icon-container">
                                                 <img src="assets/images/${getPersonalityImage(type)}" 
-                                                     alt="${personalityData.characterName}" 
-                                                     style="width: 100px; height: 100px; object-fit: contain;">
+                                                     alt="${personalityData.characterName}">
                                             </div>
                                         </div>
                                         <div class="other-personality-info">
@@ -684,32 +670,9 @@ function showResults() {
                                 ${personalityData.points ? `
                                 <div class="personality-points">
                                     ${personalityData.points.map(point => `
-                                        <div class="point-item-container" style="
-                                            width: 100%;
-                                            margin: 8px 0;
-                                            padding: 12px 16px;
-                                            background: rgba(255, 255, 255, 0.9);
-                                            border-radius: 12px;
-                                            border: 2px solid var(--personality-color, #2d3748);
-                                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 12px;
-                                            transition: all 0.3s ease;
-                                        ">
-                                            <span class="point-icon" style="
-                                                color: white !important;
-                                                font-size: 18px;
-                                                font-weight: bold;
-                                                min-width: 24px;
-                                            ">✓</span>
-                                            <span class="point-text" style="
-                                                color: #2d3748 !important;
-                                                font-size: 16px;
-                                                font-weight: 500;
-                                                line-height: 1.4;
-                                                flex: 1;
-                                            ">${point}</span>
+                                        <div class="point-item-container">
+                                            <span class="point-icon">✓</span>
+                                            <span class="point-text">${point}</span>
                                         </div>
                                     `).join('')}
                                 </div>
