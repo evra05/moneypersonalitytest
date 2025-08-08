@@ -57,7 +57,7 @@ const questions = [
     },
     {
         id: 11,
-        text: "Adakah kamu rasa gembira bila buat orang lain gembira dengan hadiah saya.",
+        text: "Adakah kamu rasa gembira bila buat orang lain gembira dengan hadiah saya?",
         type: "Giver"
     },
     {
