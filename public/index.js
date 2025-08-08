@@ -852,3 +852,430 @@ function updateNavigationButtons() {
         }
     }
 }
+
+// Share functionality
+function initializeShareButton() {
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', handleShare);
+    }
+}
+
+// Handle share button click
+async function handleShare() {
+    try {
+        // Generate share content
+        const shareContent = generateShareContent();
+        
+        // Try native Web Share API first
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Personaliti Wang Saya',
+                text: shareContent.text,
+                url: window.location.href
+            });
+        } else {
+            // Fallback to custom share options
+            showShareOptions(shareContent);
+        }
+    } catch (error) {
+        console.error('Share failed:', error);
+        // Fallback to custom share options
+        const shareContent = generateShareContent();
+        showShareOptions(shareContent);
+    }
+}
+
+// Generate share content
+function generateShareContent() {
+    // Calculate highest scoring personality type
+    const maxScore = Math.max(...Object.values(scores));
+    const topPersonalities = Object.keys(scores).filter(type => scores[type] === maxScore);
+    const mainPersonality = topPersonalities[0];
+    const personalityData = personalityTypes[mainPersonality];
+    
+    // Calculate percentages
+    const totalQuestions = questions.length;
+    const personalityPercentages = {};
+    Object.keys(scores).forEach(type => {
+        personalityPercentages[type] = Math.round((scores[type] / totalQuestions) * 100);
+    });
+    
+    // Generate share text
+    const shareText = `🎯 Personaliti Wang Saya: ${personalityData.title} ${personalityData.icon}
+
+${personalityData.description}
+
+📊 Keputusan Lengkap:
+${Object.keys(personalityTypes).map(type => {
+    const data = personalityTypes[type];
+    const percentage = personalityPercentages[type] || 0;
+    return `${data.icon} ${data.title}: ${percentage}%`;
+}).join('\n')}
+
+🔗 Ambil ujian anda di: ${window.location.href}
+
+#PersonalitiWang #UjianPersonaliti #Kewangan`;
+
+    // Generate share image data (for future use)
+    const shareImageData = {
+        personality: mainPersonality,
+        title: personalityData.title,
+        icon: personalityData.icon,
+        description: personalityData.description,
+        percentages: personalityPercentages
+    };
+
+    return {
+        text: shareText,
+        imageData: shareImageData,
+        url: window.location.href
+    };
+}
+
+// Show custom share options
+function showShareOptions(shareContent) {
+    // Create share modal
+    const modal = document.createElement('div');
+    modal.className = 'share-modal';
+    modal.innerHTML = `
+        <div class="share-modal-content">
+            <div class="share-modal-header">
+                <h3>📤 Kongsi Keputusan</h3>
+                <button class="share-modal-close">&times;</button>
+            </div>
+            <div class="share-modal-body">
+                <div class="share-options">
+                    <button class="share-option" data-method="copy">
+                        <span class="share-icon">📋</span>
+                        <span>Salin Teks</span>
+                    </button>
+                    <button class="share-option" data-method="whatsapp">
+                        <span class="share-icon">💬</span>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button class="share-option" data-method="telegram">
+                        <span class="share-icon">📱</span>
+                        <span>Telegram</span>
+                    </button>
+                    <button class="share-option" data-method="facebook">
+                        <span class="share-icon">📘</span>
+                        <span>Facebook</span>
+                    </button>
+                    <button class="share-option" data-method="twitter">
+                        <span class="share-icon">🐦</span>
+                        <span>Twitter</span>
+                    </button>
+                    <button class="share-option" data-method="email">
+                        <span class="share-icon">📧</span>
+                        <span>Email</span>
+                    </button>
+                </div>
+                <div class="share-preview">
+                    <h4>Pratonton:</h4>
+                    <div class="share-preview-content">
+                        ${shareContent.text.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .share-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInUp 0.3s ease;
+        }
+        
+        .share-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .share-modal-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .share-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+        
+        .share-modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .share-modal-body {
+            padding: 1.5rem;
+        }
+        
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .share-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-color: #10b981;
+        }
+        
+        .share-icon {
+            font-size: 1.5rem;
+        }
+        
+        .share-preview {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .share-preview h4 {
+            margin: 0 0 0.5rem 0;
+            color: #374151;
+            font-size: 1rem;
+        }
+        
+        .share-preview-content {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #374151;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 600px) {
+            .share-modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+            
+            .share-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
+
+    // Handle close button
+    const closeBtn = modal.querySelector('.share-modal-close');
+    closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        document.head.removeChild(style);
+    });
+
+    // Handle share options
+    const shareOptions = modal.querySelectorAll('.share-option');
+    shareOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const method = option.dataset.method;
+            handleShareMethod(method, shareContent);
+        });
+    });
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+            document.head.removeChild(style);
+        }
+    });
+}
+
+// Handle different share methods
+function handleShareMethod(method, shareContent) {
+    const { text, url } = shareContent;
+    
+    switch (method) {
+        case 'copy':
+            copyToClipboard(text);
+            break;
+        case 'whatsapp':
+            shareToWhatsApp(text, url);
+            break;
+        case 'telegram':
+            shareToTelegram(text, url);
+            break;
+        case 'facebook':
+            shareToFacebook(url);
+            break;
+        case 'twitter':
+            shareToTwitter(text, url);
+            break;
+        case 'email':
+            shareToEmail(text, url);
+            break;
+    }
+}
+
+// Copy to clipboard
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showNotification('✅ Teks telah disalin ke clipboard!');
+    } catch (error) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('✅ Teks telah disalin ke clipboard!');
+    }
+}
+
+// Share to WhatsApp
+function shareToWhatsApp(text, url) {
+    const whatsappText = encodeURIComponent(text);
+    const whatsappUrl = `https://wa.me/?text=${whatsappText}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+// Share to Telegram
+function shareToTelegram(text, url) {
+    const telegramText = encodeURIComponent(text);
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${telegramText}`;
+    window.open(telegramUrl, '_blank');
+}
+
+// Share to Facebook
+function shareToFacebook(url) {
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank');
+}
+
+// Share to Twitter
+function shareToTwitter(text, url) {
+    const twitterText = encodeURIComponent(text.substring(0, 200) + '...');
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${twitterText}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank');
+}
+
+// Share to Email
+function shareToEmail(text, url) {
+    const subject = encodeURIComponent('Personaliti Wang Saya');
+    const body = encodeURIComponent(text);
+    const emailUrl = `mailto:?subject=${subject}&body=${body}`;
+    window.location.href = emailUrl;
+}
+
+// Show notification
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'share-notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 10001;
+        animation: slideInRight 0.3s ease;
+        font-weight: 500;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Initialize share button when results are shown
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize share button
+    initializeShareButton();
+    
+    // Re-initialize share button when results are shown
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                const shareBtn = document.getElementById('share-btn');
+                if (shareBtn && !shareBtn.hasAttribute('data-initialized')) {
+                    shareBtn.setAttribute('data-initialized', 'true');
+                    shareBtn.addEventListener('click', handleShare);
+                }
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
